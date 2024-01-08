@@ -258,8 +258,14 @@ var _ = BeforeSuite(func() {
 			b, err := templates.ReadFile(path.Join("templates", asset.Name()))
 			Expect(err).ToNot(HaveOccurred())
 
+			// Get the value of the GKE_PROJECT_ID environment variable
+			gkeProjectID := os.Getenv("GKE_PROJECT_ID")
+
+			// Replace the placeholder in the file content with the actual value
+			content := strings.Replace(string(b), "${GKE_PROJECT_ID}", gkeProjectID, -1)
+
 			gkeCluster := &gkev1.GKEClusterConfig{}
-			Expect(yaml.Unmarshal(b, gkeCluster)).To(Succeed())
+			Expect(yaml.Unmarshal([]byte(content), gkeCluster)).To(Succeed())
 
 			name := strings.TrimSuffix(asset.Name(), ".yaml")
 			generatedName := names.SimpleNameGenerator.GenerateName(name + "-")
